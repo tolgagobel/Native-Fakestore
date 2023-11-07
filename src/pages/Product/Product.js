@@ -1,32 +1,28 @@
 import React, { useEffect, useState } from "react";
-import { FlatList, SafeAreaView, Text, View } from "react-native";
-import styles from './Product.style'
+import { ActivityIndicator, FlatList, SafeAreaView, Text, View } from "react-native";
 import Config from "react-native-config";
-import axios from 'axios';
 import ProductCard from "../../components/ProductCard/ProductCard";
+import useFetch from '../../hooks/useFetch';
 
-const Product = () => {
+const Product = ({navigation}) => {
 
-    const [productlist, setProductlist] = useState([]);
+    const { error, loading, productlist } = useFetch(Config.API_URL);
 
-    const getProducts = async () => {
-        try {
-            const products = await axios.get(Config.API_URL);
-            setProductlist(products.data);
-        } catch (error) {
-            console.error('Error fetching products:', error);
-        }
+    const handleProductSelect = id => {
+        navigation.navigate('DetailScreen',{id});
     }
 
-
-    useEffect(() => {
-        getProducts();
-    }, []);
-
     const renderProduct = ({ item }) => (
-        <ProductCard product={item} />
+        <ProductCard product={item} onSelect={() => handleProductSelect(item.id)} />
     );
 
+    if (loading) {
+        return <ActivityIndicator size={'large'} />
+    }
+
+    if (error) {
+        return <Text>{error}</Text>
+    }
 
     return (
         <SafeAreaView>
